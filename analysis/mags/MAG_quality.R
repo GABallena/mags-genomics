@@ -1,17 +1,3 @@
-# Portfolio-safe script (paths/identifiers generalized; inputs not included).
-
-# ------- Working directory handling -------
-# When run via `Rscript`, set working directory to the script's directory.
-try({
-  args_all <- commandArgs(trailingOnly = FALSE)
-  file_arg <- grep("^--file=", args_all, value = TRUE)
-  if(length(file_arg) == 1){
-    script_path <- normalizePath(sub("^--file=", "", file_arg))
-    setwd(dirname(script_path))
-  }
-}, silent = TRUE)
-cat("Working directory:", getwd(), "\n")
-
 # Load libraries
 library(ggplot2)
 library(dplyr)
@@ -25,14 +11,7 @@ library(purrr)
 library(rlang)  # for tidy-eval (.data, sym)
 library(utils)
 
-# ---- Config ----
-CHECKM_TSV <- Sys.getenv("CHECKM_TSV", "results/tables/mag_quality_checkm.tsv")
-CHECKM2_TSV <- Sys.getenv("CHECKM2_TSV", "results/tables/mag_quality_checkm2.tsv")
-GTDB_TSV <- Sys.getenv("GTDB_TSV", "results/tables/gtdbtk_summary.tsv")
-OUT_DIR <- Sys.getenv("OUT_DIR", "results/figures/mags")
-dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
-
-
+setwd("~/Desktop/Results")
 
  
 
@@ -165,7 +144,7 @@ load_gtdb_all <- function(root = "gtdbtk_drep_out") {
 
 load_metawrap_all <- function(root = "metawrap_stats_only") {
   if (!dir.exists(root)) return(tibble())
-  stat_paths <- list.files(root, pattern = "^PROJECT-", full.names = TRUE)
+  stat_paths <- list.files(root, pattern = "^SAMPLE-"  # adjust for your sample folder naming, full.names = TRUE)
   stat_paths <- stat_paths[file.info(stat_paths)$isdir]
   map_dfr(stat_paths, function(sp) {
     stats_file <- file.path(sp, "metawrap_50_10_bins.stats")
@@ -195,7 +174,7 @@ load_metawrap_all <- function(root = "metawrap_stats_only") {
 # and that scaffold_stats.tsv contains a 'Bin Id' or 'bin' column with mag_id-compatible names
 load_refinem_coverage <- function(root = "refinem_stats") {
   if (!dir.exists(root)) return(tibble())
-  smps <- list.files(root, pattern = "^PROJECT-", full.names = TRUE)
+  smps <- list.files(root, pattern = "^SAMPLE-"  # adjust for your sample folder naming, full.names = TRUE)
   smps <- smps[file.info(smps)$isdir]
   map_dfr(smps, function(sp) {
     cov_fp <- file.path(sp, "coverage.tsv")
@@ -242,7 +221,7 @@ unified <- chk1 %>%
   # Attach optional RefineM coverage
   left_join(refc, by = "mag_id") %>%
   mutate(
-    sample = coalesce(sample, str_extract(mag_id, "PROJECT-\\d{2}_(S|S)\\d+")),
+    sample = coalesce(sample, str_extract(mag_id, "[A-Za-z0-9-]+_S\\d+")),
     mimag_chk1 = !is.na(Completeness_chk1) & Completeness_chk1 >= 90 & coalesce(Contamination_chk1, 1000) <= 5,
     mimag_chk2 = !is.na(Completeness_chk2) & Completeness_chk2 >= 90 & coalesce(Contamination_chk2, 1000) <= 5,
     classification_mimag = case_when(
@@ -1282,3 +1261,4 @@ if (file.exists(meta_path)) {
     ggsave(file.path("mag_analysis", "mag_diversity_multiindex_facet.png"), g_multi_raw, width = 11, height = 8, dpi = 300, bg = "white")
   }
 }
+
