@@ -1,17 +1,35 @@
-# mags-genomics: k-mer signatures and marker workflows
+# mags-genomics
 
-This module groups exploratory, portfolio-safe utilities for genomic QC / feature engineering using k-mers and marker sequences.
+Genome-resolved metagenomics utilities for **MAG assembly, QC, taxonomy, and downstream summaries**.
 
-## Contents
-- `workflows/kmer_signatures/`
-  - Snakemake workflows for:
-    - marker generation
-    - k-mer variance diagnostics
-    - k-mer diversity evaluation
-    - k-mer contamination checks
-- `tools/kmer_signatures/`
-  - Python helper scripts used by the workflows.
+This repo focuses on building a reproducible workflow that turns metagenomic assemblies/bins into:
+- quality metrics (completeness/contamination)
+- taxonomy labels
+- non-redundant MAG sets
+- analysis-ready tables for plotting and reporting
 
-## Notes
-- The scripts are provided as-is, with identifiers generalized for privacy.
-- These are intended as reusable building blocks; you will typically adapt paths/inputs to your environment.
+## Scope (high level)
+- assembly/bin ingestion + metadata harmonization
+- QC parsing and thresholding
+- dereplication / representative selection
+- taxonomy joins + summary tables
+- plotting helpers for MAG counts and quality distributions
+
+## Expected inputs
+Provide your own inputs locally (do not commit them):
+- MAG FASTA files and/or bin sets
+- tool outputs (QC, taxonomy, dereplication summaries)
+- sample metadata tables (CSV/TSV)
+
+## Quick start
+Run scripts from repo root (examples):
+```bash
+python -m mags_genomics.build_tables --input data/ --out outputs/
+python -m mags_genomics.plot --tables outputs/tables/ --out outputs/figures/
+```
+
+If your repo is primarily shell/R instead of Python, replace the commands above with your actual entrypoints.
+
+
+## License
+MIT — see `LICENSE`.
